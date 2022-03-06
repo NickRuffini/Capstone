@@ -1,8 +1,7 @@
-import React, {Component} /*, {useState, useEffect}*/ from "react";
+import React, {Component} from "react";
 import Grid from "@material-ui/core/Grid";
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
-//import Axios from 'axios';
 
 class Home extends Component {
 
@@ -12,22 +11,28 @@ class Home extends Component {
   }
 
   async componentDidMount() {
-      const response = await fetch('/api/country/SHN');
+      const response = await fetch('/api/allCountries');
       const body = await response.json();
+
       this.setState({countryInfo :body, isLoading: false});
   }
 
-  //const[countryList, setCountryList] = useState([])
-
-  /*useEffect(() => {
-    Axios.get('http://localhost:8080/api/country/SHN').then((response) => {
-      setCountryList(response.data.recordset)
-      console.log(countryList);
-    })
-  }, [])*/
   render() {
+    const sortingCriteria = ['iso_code', 'continent', 'location', 'date', 'total_cases', 'new_cases', 'total_deaths',
+                              'new_deaths', 'total_cases_per_million', 'new_cases_per_million', 'total_deaths_per_million',
+                              'icu_patients', 'icu_patients_per_million', 'hosp_patients', 'hosp_patients_per_million',
+                              'weekly_icu_admissions', 'weekly_icu_admissions_per_million', 'weekly_hosp_admission',
+                              'weekly_hosp_admissions_per_million', 'new_tests', 'total_tests', 'total_tests_per_thousand',
+                              'new_tests_per_thousand', 'positive_rate', 'tests_per_case', 'tests_units', 
+                              'total_vaccinations', 'people_vaccinated', 'people_fully_vaccinated', 'total_boosters',
+                              'new_vaccinations', 'total_vaccinations_per_hundred', 'people_vaccinated_per_hundred',
+                              'people_fully_vaccinated_per_hundred', 'total_boosters_per_hundred', 'population_density',
+                              'median_age', 'aged_65_older', 'aged_70_older', 'gdp_per_capita', 'extreme_poverty',
+                              'cardiovasc_death_rate', 'diabetes_prevalence', 'female_smokers', 'male_smokers', 
+                              'handwashing_facilities', 'hospital_beds_per_thousand', 'life_expectancy', 
+                              'human_development_index', 'gdp_category', 'death_category'];
+
     const {countryInfo, isLoading} = this.state;
-    console.log(countryInfo);
 
     if(isLoading) {
       return(<div>Loading...</div>)
@@ -46,9 +51,10 @@ class Home extends Component {
           <Dropdown options={countryNameInfo} placeholder="Countries" />
         </Grid>
         <Grid item xs={3}>
-          <Dropdown placeholder="Criteria"/>
+          <Dropdown options={sortingCriteria} placeholder="Criteria"/>
         </Grid>
       </Grid>
+      <a href="https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-codebook.csv">Criteria Definitions</a>
     </main>
     );
   }

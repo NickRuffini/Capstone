@@ -20,7 +20,15 @@ public class CountryController {
 	
 	@GetMapping("/allCountries")
 	List<CountryEntry> allCountries() {
-		String sql = "SELECT TOP 3 * FROM CovidMostRecentCaseResultsZero";
+		String sql = "SELECT * FROM CovidMostRecentCaseResultsZero";
+		List<CountryEntry> list = jbdcTemplate.query(sql, BeanPropertyRowMapper.newInstance(CountryEntry.class));
+		
+		return list;
+	}
+	
+	@GetMapping("/allCriteria")
+	List<CountryEntry> allCriteria() {
+		String sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CovidMostRecentCaseResultsZero'";
 		List<CountryEntry> list = jbdcTemplate.query(sql, BeanPropertyRowMapper.newInstance(CountryEntry.class));
 		
 		return list;
@@ -33,6 +41,8 @@ public class CountryController {
 		
 		return country;
 	}
+	
+	
 	
 	
 }
