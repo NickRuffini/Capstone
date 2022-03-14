@@ -26,9 +26,10 @@ public class CountryController {
 		return list;
 	}
 	
-	@GetMapping("/allCriteria")
-	List<CountryEntry> allCriteria() {
-		String sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CovidMostRecentCaseResultsZero'";
+	// Selects the top 5 countries with the highest {insert criteria here}
+	@GetMapping("/criteria/{criteriaName}")
+	List<CountryEntry> getCriteriaTopFive(@PathVariable String criteriaName) {
+		String sql = "SELECT TOP(5) * FROM CovidMostRecentCaseResultsZero db ORDER BY db." + criteriaName + " DESC;";
 		List<CountryEntry> list = jbdcTemplate.query(sql, BeanPropertyRowMapper.newInstance(CountryEntry.class));
 		
 		return list;

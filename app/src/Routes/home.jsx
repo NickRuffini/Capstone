@@ -2,20 +2,45 @@ import React, {Component} from "react";
 import Grid from "@material-ui/core/Grid";
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 
 class Home extends Component {
 
   state = {
     isLoading: true,
-    countryInfo: []
+    countryInfo: [],
+    graphInfo: []
   }
 
   async componentDidMount() {
-      const response = await fetch('/api/allCountries');
+      /*const response = await fetch('/api/allCountries');
       const body = await response.json();
 
-      this.setState({countryInfo :body, isLoading: false});
+      this.setState({countryInfo :body, isLoading: false});*/
+
+      Promise.all([fetch('/api/allCountries'), fetch('/api/criteria/total_deaths_per_million')])
+
+      .then(([res1, res2]) => { 
+         return Promise.all([res1.json(), res2.json()]) 
+      })
+      .then(([res1, res2]) => {
+        this.setState({countryInfo :res1, graphInfo :res2, isLoading: false});
+      });
   }
+
+  
 
   render() {
     const sortingCriteria = ['iso_code', 'continent', 'location', 'date', 'total_cases', 'new_cases', 'total_deaths',
@@ -32,7 +57,7 @@ class Home extends Component {
                               'handwashing_facilities', 'hospital_beds_per_thousand', 'life_expectancy', 
                               'human_development_index', 'gdp_category', 'death_category'];
 
-    const {countryInfo, isLoading} = this.state;
+    const {countryInfo, graphInfo, isLoading} = this.state;
 
     if(isLoading) {
       return(<div>Loading...</div>)
@@ -42,6 +67,51 @@ class Home extends Component {
     for (let i = 0; i < countryInfo.length; i++) {
       countryNameInfo[i] = countryInfo.at(i)['location']
     }
+
+    // Graph ---------------------------------------------------------------------------------------------------
+
+    ChartJS.register(
+      CategoryScale,
+      LinearScale,
+      PointElement,
+      LineElement,
+      BarElement,
+      ArcElement,
+      Title,
+      Tooltip,
+      Legend
+    );
+
+    const options = {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Covid Deaths Per Million',
+        },
+      },
+    };
+
+    const graphCountryNames = [];
+    for (let i = 0; i < graphInfo.length; i++) {
+      graphCountryNames[i] = graphInfo.at(i)['location'] 
+    }
+
+    const graphCountryDeaths = [];
+    for (let i = 0; i < graphInfo.length; i++) {
+      graphCountryDeaths[i] = graphInfo.at(i)['total_deaths_per_million']
+    }
+
+    const report2Chart = {
+        labels: graphCountryNames,
+        datasets: [{
+          label: 'Countries',
+          data: graphCountryDeaths,
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        }]
+    }
+
+    // Return ---------------------------------------------------------------------------------------------------------
 
     return(
       <main style={{ padding: "1rem 0" }}>
@@ -53,6 +123,11 @@ class Home extends Component {
         <Grid item xs={3}>
           <Dropdown options={sortingCriteria} placeholder="Criteria"/>
         </Grid>
+        <Grid item xs={12}>
+            <div className='chart'>
+              <Bar data={report2Chart} options={options}/>
+            </div>
+          </Grid>
       </Grid>
       <a href="https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-codebook.csv">Criteria Definitions</a>
     </main>
