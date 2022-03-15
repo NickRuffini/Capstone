@@ -38,9 +38,7 @@ class Home extends Component {
       .then(([res1, res2]) => {
         this.setState({countryInfo :res1, graphInfo :res2, isLoading: false});
       });
-  }
-
-  
+  }  
 
   render() {
     const sortingCriteria = ['iso_code', 'continent', 'location', 'date', 'total_cases', 'new_cases', 'total_deaths',
@@ -59,6 +57,17 @@ class Home extends Component {
 
     const {countryInfo, graphInfo, isLoading} = this.state;
 
+    const getCountry = (countryName) => {
+      Promise.all([fetch('/api/country/onlyCountryInput/' + countryName)])
+  
+      .then(([res1]) => { 
+         return Promise.all([res1.json()]) 
+      })
+      .then(([res1]) => {
+        this.setState({graphInfo: res1});
+      });
+    }
+
     if(isLoading) {
       return(<div>Loading...</div>)
     }
@@ -69,6 +78,9 @@ class Home extends Component {
     }
 
     // Graph ---------------------------------------------------------------------------------------------------
+
+    const graphCountryNames = [];
+    const graphBarData = [];
 
     ChartJS.register(
       CategoryScale,
@@ -87,27 +99,27 @@ class Home extends Component {
       plugins: {
         title: {
           display: true,
-          text: 'Covid Deaths Per Million',
+          text: 'Covid Deaths Per Million', // change to default variable we can change when needed
         },
       },
     };
 
-    const graphCountryNames = [];
+    // Gets the initial names of the countries for the total_deaths_per_million starting query
     for (let i = 0; i < graphInfo.length; i++) {
       graphCountryNames[i] = graphInfo.at(i)['location'] 
     }
 
-    const graphCountryDeaths = [];
+    // Gets the initial values of the graph data, which is the total_deaths_per_million
     for (let i = 0; i < graphInfo.length; i++) {
-      graphCountryDeaths[i] = graphInfo.at(i)['total_deaths_per_million']
+      graphBarData[i] = graphInfo.at(i)['total_deaths_per_million']
     }
 
     const report2Chart = {
         labels: graphCountryNames,
         datasets: [{
-          label: 'Countries',
-          data: graphCountryDeaths,
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          label: 'Deaths', // Change to generic variable that we can change when needed
+          data: graphBarData,
+          backgroundColor: 'rgba(255, 99, 132, 0.5)', // change so that the colors are random? like on the pie chart in nba proj
         }]
     }
 
@@ -118,7 +130,9 @@ class Home extends Component {
       <h2>General Takeaways</h2>
       <Grid container spacing={2} alignItems="center" justifyContent="center">
         <Grid item xs={3}>
-          <Dropdown options={countryNameInfo} placeholder="Countries" />
+          <Dropdown options={countryNameInfo} placeholder="Countries" onChange={(e)=>{
+              getCountry(e.value)
+            }}/>
         </Grid>
         <Grid item xs={3}>
           <Dropdown options={sortingCriteria} placeholder="Criteria"/>
