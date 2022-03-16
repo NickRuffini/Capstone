@@ -21,15 +21,13 @@ class Home extends Component {
   state = {
     isLoading: true,
     countryInfo: [],
-    graphInfo: []
+    graphInfo: [],
+    countrySelected: "",
+    criteriaSelected: ""
   }
 
+  // Initial API call when the component loads up for first time, gets all country names and info for initial graph
   async componentDidMount() {
-      /*const response = await fetch('/api/allCountries');
-      const body = await response.json();
-
-      this.setState({countryInfo :body, isLoading: false});*/
-
       Promise.all([fetch('/api/allCountries'), fetch('/api/criteria/total_deaths_per_million')])
 
       .then(([res1, res2]) => { 
@@ -55,17 +53,35 @@ class Home extends Component {
                               'handwashing_facilities', 'hospital_beds_per_thousand', 'life_expectancy', 
                               'human_development_index', 'gdp_category', 'death_category'];
 
-    const {countryInfo, graphInfo, isLoading} = this.state;
+    const {countryInfo, graphInfo, isLoading, countrySelected, criteriaSelected} = this.state;
 
+    // Handles the API call when we change the Country we want to look at in graph
+    // 1 case is when there is no criteria to search on as well
+    // 2nd case is when there IS a criteria to sort on
     const getCountry = (countryName) => {
-      Promise.all([fetch('/api/country/onlyCountryInput/' + countryName)])
+      if(criteriaSelected === "") {
+        Promise.all([fetch('/api/country/onlyCountryInput/' + countryName)])
   
-      .then(([res1]) => { 
-         return Promise.all([res1.json()]) 
-      })
-      .then(([res1]) => {
-        this.setState({graphInfo: res1});
-      });
+        .then(([res1]) => { 
+           return Promise.all([res1.json()]) 
+        })
+        .then(([res1]) => {
+          this.setState({graphInfo: res1, countrySelected: countryName});
+        });
+      }
+    }
+
+    const getCriteria = (criteriaName) => {
+      if(countrySelected === "") {
+        Promise.all([fetch('/api/criteria/' + criteriaName)])
+  
+        .then(([res1]) => { 
+           return Promise.all([res1.json()]) 
+        })
+        .then(([res1]) => {
+          this.setState({graphInfo: res1, criteriaSelected: criteriaName});
+        });
+      }
     }
 
     if(isLoading) {
@@ -135,7 +151,9 @@ class Home extends Component {
             }}/>
         </Grid>
         <Grid item xs={3}>
-          <Dropdown options={sortingCriteria} placeholder="Criteria"/>
+          <Dropdown options={sortingCriteria} placeholder="Criteria" onChange={(e)=>{
+              getCriteria(e.value)
+            }}/>
         </Grid>
         <Grid item xs={12}>
             <div className='chart'>

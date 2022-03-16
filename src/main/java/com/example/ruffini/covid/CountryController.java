@@ -47,9 +47,9 @@ public class CountryController {
 	List<CountryEntry> getOnlyCountryInput(@PathVariable String countryName) {
 		String sql = "select * from\r\n"
 				+ "(\r\n"
-				+ "select * from (SELECT TOP(2) * FROM CovidMostRecentCaseResultsZero db WHERE cast(db.total_deaths_per_million as decimal(18,4)) > 0.0 ORDER BY cast(db.total_deaths_per_million as decimal(18,4)) ASC) as firstTwo\r\n"
+				+ "select * from (SELECT TOP(2) * FROM CovidMostRecentCaseResultsZero db WHERE cast(db.total_deaths_per_million as decimal(18,4)) > (SELECT db.total_deaths_per_million FROM CovidMostRecentCaseResultsZero db WHERE db.[location] = '" + countryName + "') ORDER BY cast(db.total_deaths_per_million as decimal(18,4)) ASC) as firstTwo\r\n"
 				+ "union \r\n"
-				+ "select * from (SELECT TOP(2) * FROM CovidMostRecentCaseResultsZero db ORDER BY cast(db.total_deaths_per_million as decimal(18,4)) DESC) as lastTwo\r\n"
+				+ "select * from (SELECT TOP(2) * FROM CovidMostRecentCaseResultsZero db WHERE cast(db.total_deaths_per_million as decimal(18,4)) < (SELECT db.total_deaths_per_million FROM CovidMostRecentCaseResultsZero db WHERE db.[location] = '" + countryName + "') ORDER BY cast(db.total_deaths_per_million as decimal(18,4)) DESC) as firstTwo\r\n"
 				+ "union\r\n"
 				+ "select * from CovidMostRecentCaseResultsZero db WHERE db.[location] = '" + countryName + "' \r\n"
 				+ ") t\r\n"
