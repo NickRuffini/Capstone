@@ -22,8 +22,8 @@ class Home extends Component {
     isLoading: true,
     countryInfo: [],
     graphInfo: [],
-    countrySelected: "",
-    criteriaSelected: ""
+    countrySelected: '',
+    criteriaSelected: 'total_deaths_per_million'
   }
 
   // Initial API call when the component loads up for first time, gets all country names and info for initial graph
@@ -39,19 +39,19 @@ class Home extends Component {
   }  
 
   render() {
-    const sortingCriteria = ['iso_code', 'continent', 'location', 'date', 'total_cases', 'new_cases', 'total_deaths',
+    // Delete the ones that return null values/aren't integers! (like continent, date, etc.)
+    const sortingCriteria = ['total_cases', 'new_cases', 'total_deaths',
                               'new_deaths', 'total_cases_per_million', 'new_cases_per_million', 'total_deaths_per_million',
                               'icu_patients', 'icu_patients_per_million', 'hosp_patients', 'hosp_patients_per_million',
-                              'weekly_icu_admissions', 'weekly_icu_admissions_per_million', 'weekly_hosp_admission',
-                              'weekly_hosp_admissions_per_million', 'new_tests', 'total_tests', 'total_tests_per_thousand',
-                              'new_tests_per_thousand', 'positive_rate', 'tests_per_case', 'tests_units', 
+                              'weekly_icu_admissions', 'weekly_icu_admissions_per_million',
+                              'weekly_hosp_admissions_per_million',
                               'total_vaccinations', 'people_vaccinated', 'people_fully_vaccinated', 'total_boosters',
                               'new_vaccinations', 'total_vaccinations_per_hundred', 'people_vaccinated_per_hundred',
                               'people_fully_vaccinated_per_hundred', 'total_boosters_per_hundred', 'population_density',
                               'median_age', 'aged_65_older', 'aged_70_older', 'gdp_per_capita', 'extreme_poverty',
-                              'cardiovasc_death_rate', 'diabetes_prevalence', 'female_smokers', 'male_smokers', 
-                              'handwashing_facilities', 'hospital_beds_per_thousand', 'life_expectancy', 
-                              'human_development_index', 'gdp_category', 'death_category'];
+                              'cardiovasc_death_rate', 'female_smokers', 'male_smokers', 
+                              'handwashing_facilities', 'life_expectancy', 
+                              'human_development_index'];
 
     const {countryInfo, graphInfo, isLoading, countrySelected, criteriaSelected} = this.state;
 
@@ -59,8 +59,19 @@ class Home extends Component {
     // 1 case is when there is no criteria to search on as well
     // 2nd case is when there IS a criteria to sort on
     const getCountry = (countryName) => {
-      if(criteriaSelected === "") {
+      // Default cause, where the criteria hasn't been changed yet!
+      if (criteriaSelected === "total_deaths_per_million") {
         Promise.all([fetch('/api/country/onlyCountryInput/' + countryName)])
+  
+        .then(([res1]) => { 
+           return Promise.all([res1.json()]) 
+        })
+        .then(([res1]) => {
+          this.setState({graphInfo: res1, countrySelected: countryName});
+        });
+      }
+      else {
+        Promise.all([fetch('/api/country/bothInputs/' + countryName + '/' + criteriaSelected)])
   
         .then(([res1]) => { 
            return Promise.all([res1.json()]) 
@@ -74,6 +85,16 @@ class Home extends Component {
     const getCriteria = (criteriaName) => {
       if(countrySelected === "") {
         Promise.all([fetch('/api/criteria/' + criteriaName)])
+  
+        .then(([res1]) => { 
+           return Promise.all([res1.json()]) 
+        })
+        .then(([res1]) => {
+          this.setState({graphInfo: res1, criteriaSelected: criteriaName});
+        });
+      }
+      else {
+        Promise.all([fetch('/api/country/bothInputs/' + countrySelected + '/' + criteriaName)])
   
         .then(([res1]) => { 
            return Promise.all([res1.json()]) 
@@ -115,7 +136,7 @@ class Home extends Component {
       plugins: {
         title: {
           display: true,
-          text: 'Covid Deaths Per Million', // change to default variable we can change when needed
+          text: 'Covid Statistics',
         },
       },
     };
@@ -125,15 +146,15 @@ class Home extends Component {
       graphCountryNames[i] = graphInfo.at(i)['location'] 
     }
 
-    // Gets the initial values of the graph data, which is the total_deaths_per_million
+    // Gets the values of the graph data, which is stored in the criteriaSelected
     for (let i = 0; i < graphInfo.length; i++) {
-      graphBarData[i] = graphInfo.at(i)['total_deaths_per_million']
+      graphBarData[i] = graphInfo.at(i)[criteriaSelected]
     }
 
     const report2Chart = {
         labels: graphCountryNames,
         datasets: [{
-          label: 'Deaths', // Change to generic variable that we can change when needed
+          label: criteriaSelected, // Change to generic variable that we can change when needed
           data: graphBarData,
           backgroundColor: 'rgba(255, 99, 132, 0.5)', // change so that the colors are random? like on the pie chart in nba proj
         }]
