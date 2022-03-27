@@ -23,18 +23,20 @@ class Home extends Component {
     countryInfo: [],
     graphInfo: [],
     countrySelected: '',
-    criteriaSelected: 'total_deaths_per_million'
+    criteriaSelected: 'total_deaths_per_million',
+    wekaInfo: []
   }
 
   // Initial API call when the component loads up for first time, gets all country names and info for initial graph
   async componentDidMount() {
-      Promise.all([fetch('/api/allCountries'), fetch('/api/criteria/total_deaths_per_million')])
+      Promise.all([fetch('/api/allCountries'), fetch('/api/criteria/total_deaths_per_million'), fetch('/api/weka')])
 
-      .then(([res1, res2]) => { 
-         return Promise.all([res1.json(), res2.json()]) 
+      .then(([res1, res2, res3]) => { 
+         return Promise.all([res1.json(), res2.json(), res3.json()]) 
       })
-      .then(([res1, res2]) => {
-        this.setState({countryInfo :res1, graphInfo :res2, isLoading: false});
+      .then(([res1, res2, res3]) => {
+        this.setState({countryInfo :res1, graphInfo :res2, wekaInfo :res3, isLoading: false});
+        console.log(this.state.wekaInfo[0])
       });
   }  
 
@@ -53,7 +55,7 @@ class Home extends Component {
                               'handwashing_facilities', 'life_expectancy', 
                               'human_development_index'];
 
-    const {countryInfo, graphInfo, isLoading, countrySelected, criteriaSelected} = this.state;
+    const {countryInfo, graphInfo, isLoading, countrySelected, criteriaSelected, wekaInfo} = this.state;
 
     // Handles the API call when we change the Country we want to look at in graph
     // 1 case is when there is no criteria to search on as well
@@ -151,12 +153,21 @@ class Home extends Component {
       graphBarData[i] = graphInfo.at(i)[criteriaSelected]
     }
 
+    var rgbList = []
+    for(var j = 0; j < 20; j++) {
+      var rgb = [];
+      for(var i = 0; i < 3; i++) {
+        rgb.push(Math.floor(Math.random() * 255));
+      }
+      rgbList[j] = "rgba(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ", 0.2)"
+    }
+
     const report2Chart = {
         labels: graphCountryNames,
         datasets: [{
-          label: criteriaSelected, // Change to generic variable that we can change when needed
+          label: criteriaSelected, 
           data: graphBarData,
-          backgroundColor: 'rgba(255, 99, 132, 0.5)', // change so that the colors are random? like on the pie chart in nba proj
+          backgroundColor: rgbList, // change so that the colors are random? like on the pie chart in nba proj
         }]
     }
 
@@ -180,7 +191,12 @@ class Home extends Component {
             <div className='chart'>
               <Bar data={report2Chart} options={options}/>
             </div>
-          </Grid>
+        </Grid>
+        <Grid item xs={12}>
+            <div>
+              {wekaInfo[0]}
+            </div>
+        </Grid>
       </Grid>
       <a href="https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-codebook.csv">Criteria Definitions</a>
     </main>

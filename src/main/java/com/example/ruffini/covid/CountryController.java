@@ -1,5 +1,6 @@
 package com.example.ruffini.covid;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+//Importing required classes
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Random;
+import weka.classifiers.Evaluation;
+import weka.classifiers.trees.J48;
+import weka.core.Instances;
+
+import weka.classifiers.trees.RandomForest;
 
 @RestController
 @RequestMapping("/api")
@@ -80,6 +91,48 @@ public class CountryController {
 		return country;
 	}
 	
-	
-	
+	@GetMapping("/weka")
+	List<String> getWeka() {
+		// Try block to check for exceptions
+        try {
+            // Create J48 classifier by
+            // creating object of J48 class
+            //J48 j48Classifier = new J48();
+        	
+        	RandomForest randomForestClassifier = new RandomForest();
+ 
+            // Data set path
+            String dataset = "C:/Users/njruf/OneDrive/Documents/Capstone Stuff/CovidMostRecentCaseResultsZero.arff";
+ 
+            // Creating buffered reader to read the data set
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(dataset));
+ 
+            // Create data set instances
+            Instances datasetInstances = new Instances(bufferedReader);
+ 
+            // Set Target Class
+            datasetInstances.setClassIndex(datasetInstances.numAttributes() - 12);
+            
+            System.out.println(datasetInstances.classAttribute().toString());
+ 
+            // Evaluating by creating object of Evaluation
+            // class
+            Evaluation evaluation = new Evaluation(datasetInstances);
+ 
+            // Cross Validate Model with 10 folds
+            evaluation.crossValidateModel(randomForestClassifier, datasetInstances, 10, new Random(1));
+ 
+            List<String> wekaList = new ArrayList<String>();
+            wekaList.add(evaluation.toSummaryString("\nResults", false));
+            
+            return wekaList;
+        }
+ 
+        // Catch block to handle the exceptions
+        catch (Exception e) {
+ 
+            // Print message on the console
+            return new ArrayList<String>();
+        }
+	}	
 }
