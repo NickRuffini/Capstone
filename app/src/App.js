@@ -12,7 +12,7 @@ function App() {
         }}
         >
           <Link to="/home">Home</Link> |{" "}
-          <Link to="/gdp">GDP vs Vacc</Link> |{" "}
+          <Link to="/weka">Weka</Link> |{" "}
         </nav>
         <Outlet/>
     </div>

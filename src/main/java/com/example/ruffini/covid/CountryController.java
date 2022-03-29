@@ -90,9 +90,9 @@ public class CountryController {
 		
 		return country;
 	}
-	
-	@GetMapping("/weka")
-	List<String> getWeka() {
+/*
+	@GetMapping("/weka/{criteriaName}")
+	List<String> getWeka(@PathVariable String criteriaName) {
 		// Try block to check for exceptions
         try {
             // Create J48 classifier by
@@ -110,10 +110,9 @@ public class CountryController {
             // Create data set instances
             Instances datasetInstances = new Instances(bufferedReader);
  
-            // Set Target Class
-            datasetInstances.setClassIndex(datasetInstances.numAttributes() - 12);
             
-            System.out.println(datasetInstances.classAttribute().toString());
+            // Set Target Class
+            datasetInstances.setClassIndex(datasetInstances.numAttributes() - 2);
  
             // Evaluating by creating object of Evaluation
             // class
@@ -134,5 +133,49 @@ public class CountryController {
             // Print message on the console
             return new ArrayList<String>();
         }
-	}	
+	}	*/
+	
+	@GetMapping("/weka")
+	List<String> getWeka() {
+		// Try block to check for exceptions
+        try {
+            // Create J48 classifier by
+            // creating object of J48 class
+            //J48 j48Classifier = new J48();
+        	
+        	RandomForest randomForestClassifier = new RandomForest();
+ 
+            // Data set path
+            String dataset = "C:/Users/njruf/OneDrive/Documents/Capstone Stuff/CovidMostRecentCaseResultsZero.arff";
+ 
+            // Creating buffered reader to read the data set
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(dataset));
+ 
+            // Create data set instances
+            Instances datasetInstances = new Instances(bufferedReader);
+ 
+            
+            // Set Target Class
+            datasetInstances.setClassIndex(datasetInstances.numAttributes() - 2);
+ 
+            // Evaluating by creating object of Evaluation
+            // class
+            Evaluation evaluation = new Evaluation(datasetInstances);
+ 
+            // Cross Validate Model with 10 folds
+            evaluation.crossValidateModel(randomForestClassifier, datasetInstances, 10, new Random(1));
+ 
+            List<String> wekaList = new ArrayList<String>();
+            wekaList.add(evaluation.toSummaryString("\nResults", false));
+            
+            return wekaList;
+        }
+ 
+        // Catch block to handle the exceptions
+        catch (Exception e) {
+ 
+            // Print message on the console
+            return new ArrayList<String>();
+        }
+	}
 }

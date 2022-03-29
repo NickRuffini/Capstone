@@ -23,20 +23,18 @@ class Home extends Component {
     countryInfo: [],
     graphInfo: [],
     countrySelected: '',
-    criteriaSelected: 'total_deaths_per_million',
-    wekaInfo: []
+    criteriaSelected: 'total_deaths_per_million'
   }
 
   // Initial API call when the component loads up for first time, gets all country names and info for initial graph
   async componentDidMount() {
-      Promise.all([fetch('/api/allCountries'), fetch('/api/criteria/total_deaths_per_million'), fetch('/api/weka')])
+      Promise.all([fetch('/api/allCountries'), fetch('/api/criteria/total_deaths_per_million')])
 
-      .then(([res1, res2, res3]) => { 
-         return Promise.all([res1.json(), res2.json(), res3.json()]) 
+      .then(([res1, res2]) => { 
+         return Promise.all([res1.json(), res2.json()]) 
       })
       .then(([res1, res2, res3]) => {
-        this.setState({countryInfo :res1, graphInfo :res2, wekaInfo :res3, isLoading: false});
-        console.log(this.state.wekaInfo[0])
+        this.setState({countryInfo :res1, graphInfo :res2, isLoading: false});
       });
   }  
 
@@ -55,7 +53,8 @@ class Home extends Component {
                               'handwashing_facilities', 'life_expectancy', 
                               'human_development_index'];
 
-    const {countryInfo, graphInfo, isLoading, countrySelected, criteriaSelected, wekaInfo} = this.state;
+    // Copy of the state variables
+    const {countryInfo, graphInfo, isLoading, countrySelected, criteriaSelected} = this.state;
 
     // Handles the API call when we change the Country we want to look at in graph
     // 1 case is when there is no criteria to search on as well
@@ -84,6 +83,9 @@ class Home extends Component {
       }
     }
 
+    // Handles the API call when we change the Criteria we want to look at in graph
+    // 1 case is when there is no country selected, so we just give generic stats for the criteria
+    // 2nd case is when there IS a country to sort on
     const getCriteria = (criteriaName) => {
       if(countrySelected === "") {
         Promise.all([fetch('/api/criteria/' + criteriaName)])
@@ -111,10 +113,12 @@ class Home extends Component {
       return(<div>Loading...</div>)
     }
 
+    // Names displayed in our Countries dropdown
     const countryNameInfo = [];
     for (let i = 0; i < countryInfo.length; i++) {
       countryNameInfo[i] = countryInfo.at(i)['location']
     }
+    countryNameInfo.sort();
 
     // Graph ---------------------------------------------------------------------------------------------------
 
@@ -167,7 +171,7 @@ class Home extends Component {
         datasets: [{
           label: criteriaSelected, 
           data: graphBarData,
-          backgroundColor: rgbList, // change so that the colors are random? like on the pie chart in nba proj
+          backgroundColor: rgbList,
         }]
     }
 
@@ -190,11 +194,6 @@ class Home extends Component {
         <Grid item xs={12}>
             <div className='chart'>
               <Bar data={report2Chart} options={options}/>
-            </div>
-        </Grid>
-        <Grid item xs={12}>
-            <div>
-              {wekaInfo[0]}
             </div>
         </Grid>
       </Grid>
