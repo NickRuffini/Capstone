@@ -18,7 +18,8 @@ import java.util.Random;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
-
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.trees.RandomForest;
 
 @RestController
@@ -90,9 +91,12 @@ public class CountryController {
 		
 		return country;
 	}
-/*
+
 	@GetMapping("/weka/{criteriaName}")
 	List<String> getWeka(@PathVariable String criteriaName) {
+		
+		System.out.println(criteriaName);
+		
 		// Try block to check for exceptions
         try {
             // Create J48 classifier by
@@ -100,26 +104,46 @@ public class CountryController {
             //J48 j48Classifier = new J48();
         	
         	RandomForest randomForestClassifier = new RandomForest();
- 
+        	//Where our attribute we WANT to look at is kept!
+        	int attributeIndex;
+        	//Where the attributes that NEGATIVELY EFFECT our attributes are!
+        	int removeArray[] = new int[1];
+        	
+        	String dataset = "C:/Users/njruf/OneDrive/Documents/Capstone Stuff/CovidMostRecentCaseResultsZero.arff";
+        	
             // Data set path
-            String dataset = "C:/Users/njruf/OneDrive/Documents/Capstone Stuff/CovidMostRecentCaseResultsZero.arff";
+        	switch(criteriaName) {
+        		case "GDP":
+        			attributeIndex = 2;
+        			removeArray[0] = 43;
+        			break;
+        		default:
+        			attributeIndex = 1;
+        			removeArray[0] = 12;
+        			break;
+        	}
  
             // Creating buffered reader to read the data set
             BufferedReader bufferedReader = new BufferedReader(new FileReader(dataset));
  
             // Create data set instances
             Instances datasetInstances = new Instances(bufferedReader);
- 
             
-            // Set Target Class
-            datasetInstances.setClassIndex(datasetInstances.numAttributes() - 2);
+            // Removes attributes that effect our class!
+            Remove removeFilter = new Remove();
+            removeFilter.setAttributeIndicesArray(removeArray);
+            removeFilter.setInputFormat(datasetInstances);
+            
+            Instances newDatasetInstances = Filter.useFilter(datasetInstances, removeFilter);
+
+            newDatasetInstances.setClassIndex(newDatasetInstances.numAttributes() - attributeIndex);
  
             // Evaluating by creating object of Evaluation
             // class
-            Evaluation evaluation = new Evaluation(datasetInstances);
+            Evaluation evaluation = new Evaluation(newDatasetInstances);
  
             // Cross Validate Model with 10 folds
-            evaluation.crossValidateModel(randomForestClassifier, datasetInstances, 10, new Random(1));
+            evaluation.crossValidateModel(randomForestClassifier, newDatasetInstances, 10, new Random(1));
  
             List<String> wekaList = new ArrayList<String>();
             wekaList.add(evaluation.toSummaryString("\nResults", false));
@@ -133,9 +157,9 @@ public class CountryController {
             // Print message on the console
             return new ArrayList<String>();
         }
-	}	*/
+	}	
 	
-	@GetMapping("/weka")
+	/*@GetMapping("/weka")
 	List<String> getWeka() {
 		// Try block to check for exceptions
         try {
@@ -177,5 +201,5 @@ public class CountryController {
             // Print message on the console
             return new ArrayList<String>();
         }
-	}
+	}*/
 }

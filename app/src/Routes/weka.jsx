@@ -7,13 +7,13 @@ class Weka extends Component {
     state = {
         isLoading: true,
         wekaInfo: [],
-        classifierSelected: '',
+        classifierSelected: 'RandomForest',
         criteriaSelected: 'GDP'
     }
 
     // Initial API call when the component loads up for first time, gets Weka initial info
     async componentDidMount() {
-        Promise.all([fetch('/api/weka')])
+        Promise.all([fetch('/api/weka/GDP')])
 
         .then(([res1]) => { 
             return Promise.all([res1.json()]) 
@@ -26,7 +26,7 @@ class Weka extends Component {
 
     render() {
         const sortingCriteria = ['GDP', 'Total Deaths Per Million'];
-        const sortingClassifiers = ['Test'];
+        const sortingClassifiers = ['RandomForest'];
 
         const {isLoading, classifierSelected, criteriaSelected, wekaInfo} = this.state;
 
@@ -49,7 +49,26 @@ class Weka extends Component {
         }
 
         const getCriteria = (criteriaName) => {
-            
+            if(classifierSelected === "") {
+                Promise.all([fetch('/api/weka/' + criteriaName)])
+          
+                .then(([res1]) => { 
+                   return Promise.all([res1.json()]) 
+                })
+                .then(([res1]) => {
+                  this.setState({wekaInfo: res1, criteriaSelected: criteriaName});
+                });
+            }
+            else {
+                Promise.all([fetch('/api/weka/' + criteriaName)])
+          
+                .then(([res1]) => { 
+                   return Promise.all([res1.json()]) 
+                })
+                .then(([res1]) => {
+                  this.setState({wekaInfo: res1, criteriaSelected: criteriaName});
+                });
+            }
         }
       
         // Handles the API call when we change the Criteria we want to look at in graph
@@ -68,12 +87,12 @@ class Weka extends Component {
                 <h2>Weka Takeaways</h2>
                 <Grid container spacing={2} alignItems="center" justifyContent="center">
                     <Grid item xs={3}>
-                    <Dropdown options={sortingCriteria} placeholder="Criteria" onChange={(e)=>{
+                    <Dropdown options={sortingCriteria} placeholder="GDP" onChange={(e)=>{
                         getCriteria(e.value)
                         }}/>
                     </Grid>
                     <Grid item xs={3}>
-                    <Dropdown options={sortingClassifiers} placeholder="Classifier" onChange={(e)=>{
+                    <Dropdown options={sortingClassifiers} placeholder="RandomForest" onChange={(e)=>{
                         getClassifier(e.value)
                         }}/>
                     </Grid>
