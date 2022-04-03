@@ -3,6 +3,14 @@ import Grid from "@material-ui/core/Grid";
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+
 class Weka extends Component {
     state = {
         isLoading: true,
@@ -30,22 +38,77 @@ class Weka extends Component {
 
         const {isLoading, classifierSelected, criteriaSelected, wekaInfo} = this.state;
 
+        function createData(criteria, number, percentage) {
+            return { criteria, number, percentage };
+        }
+
         // Formats the WEKA info so we can display it in the HTML
         function NewlineText(props) {
             const text = props.text;
-            /*let textSplit = text.split(/[\s,]+/);
+            let textSplit = text.split(/[\s,]+/);
             console.log(textSplit);
             const newText = [];
     
             newText.push('Weka ' + textSplit[1]);
-            newText.push('' + textSplit[2] + ' ' + textSplit[3] + ': ' + textSplit[4])
-            newText.push('' + textSplit[5] + ' ' + textSplit[6] + ' ' + textSplit[7] + ': ' + textSplit[8])
-            newText.push('' + textSplit[9] + ' ' + textSplit[10] + ' ' + textSplit[11] + ' '+ textSplit[12] + ': ' + textSplit[13])
-            newText.push('' + textSplit[14] + ' ' + textSplit[15] + ' ' + textSplit[16] + ': ' + textSplit[17] + textSplit[18])
-            newText.push('' + textSplit[19] + ' ' + textSplit[20] + ' ' + textSplit[21] + ' ' + textSplit[22] + ': ' + textSplit[23] + textSplit[24])
-            newText.push('' + textSplit[25] + ' ' + textSplit[26] + ' ' + textSplit[27] + ' '+ textSplit[28] + ': ' + textSplit[29])
-            return newText.map(str => <p>{str}</p>);*/
-            return text;
+            newText.push('' + textSplit[2] + ' ' + textSplit[3] + ' ' + textSplit[4] + ': ')
+            newText.push('' + textSplit[5])
+            newText.push('' + textSplit[6] + '' + textSplit[7])
+            newText.push('' + textSplit[7] + ' ' + textSplit[8] + ' ' + textSplit[9] + ' ' + textSplit[10] + ':')
+            newText.push('' + textSplit[11])
+            newText.push('' + textSplit[12] + '' + textSplit[13])
+            newText.push('' + textSplit[14] + ' ' + textSplit[15] + ':')
+            newText.push('' + textSplit[16])
+            newText.push('' + textSplit[17] + ' ' + textSplit[18] + ' ' + textSplit[19] + ':')
+            newText.push('' + textSplit[20])
+            newText.push('' + textSplit[21] + ' ' + textSplit[22] + ' ' + textSplit[23] + ' ' + textSplit[24] + ':')
+            newText.push('' + textSplit[25])
+            newText.push('' + textSplit[26] + ' ' + textSplit[27] + ' '+ textSplit[28] + ':')
+            newText.push('' + textSplit[29] + '' + textSplit[30])
+            newText.push('' + textSplit[31] + ' ' + textSplit[32] + ' ' + textSplit[33] + ' ' + textSplit[34] + ':')
+            newText.push('' + textSplit[35] + '' + textSplit[36])
+            newText.push('' + textSplit[37] + ' ' + textSplit[38] + ' ' + textSplit[39] + ' ' + textSplit[40] + ':')
+            newText.push('' + textSplit[41])
+
+            const rows = [
+                createData(newText[1], newText[2], newText[3]),
+                createData(newText[4], newText[5], newText[6]),
+                createData(newText[7], newText[8], ''),
+                createData(newText[9], newText[10], ''),
+                createData(newText[11], newText[12], ''),
+                createData(newText[13], '', newText[14]),
+                createData(newText[15], '', newText[16]),
+                createData(newText[17], newText[18], ''),
+            ];
+
+            //return newText.map(str => <p>{str}</p>);
+            //return text;
+            return (
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Criteria</TableCell>
+                        <TableCell align="right">Number</TableCell>
+                        <TableCell align="right">Percentage</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rows.map((row) => (
+                        <TableRow
+                          key={row.name}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {row.criteria}
+                          </TableCell>
+                          <TableCell align="right">{row.number}</TableCell>
+                          <TableCell align="right">{row.percentage}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+            );
         }
 
         const getCriteria = (criteriaName) => {
@@ -96,7 +159,7 @@ class Weka extends Component {
                         getClassifier(e.value)
                         }}/>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={10}>
                     <NewlineText text={wekaInfo[0]} />
                     </Grid>
                 </Grid>
