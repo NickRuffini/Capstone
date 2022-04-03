@@ -29,6 +29,7 @@ class Weka extends Component {
         .then(([res1]) => {
             this.setState({wekaInfo :res1, isLoading: false});
             console.log(this.state.wekaInfo[0])
+            console.log(this.state.wekaInfo[1])
         });
     }  
 
@@ -42,14 +43,14 @@ class Weka extends Component {
             return { criteria, number, percentage };
         }
 
-        // Formats the WEKA info so we can display it in the HTML
-        function NewlineText(props) {
+        // Formats the WEKA summary info so we can display it in the HTML
+        function WekaSummary(props) {
             const text = props.text;
             let textSplit = text.split(/[\s,]+/);
             console.log(textSplit);
             const newText = [];
     
-            newText.push('Weka ' + textSplit[1]);
+            newText.push('' + textSplit[1]);
             newText.push('' + textSplit[2] + ' ' + textSplit[3] + ' ' + textSplit[4] + ': ')
             newText.push('' + textSplit[5])
             newText.push('' + textSplit[6] + '' + textSplit[7])
@@ -92,6 +93,46 @@ class Weka extends Component {
                         <TableCell align="right">Percentage</TableCell>
                       </TableRow>
                     </TableHead>
+                    <TableBody>
+                      {rows.map((row) => (
+                        <TableRow
+                          key={row.name}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {row.criteria}
+                          </TableCell>
+                          <TableCell align="right">{row.number}</TableCell>
+                          <TableCell align="right">{row.percentage}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+            );
+        }
+
+        // Formats the WEKA summary info so we can display it in the HTML
+        function WekaMatrix(props) {
+            const text = props.text;
+            let textSplit = text.split(/[\s,]+/);
+            console.log(textSplit);
+            const newText = [];
+    
+            newText.push('' + textSplit[9]);
+            newText.push('' + textSplit[10]);
+            newText.push('' + textSplit[15]);
+            newText.push('' + textSplit[16]);
+
+            const rows = [
+                createData('classified as', 'a', 'b'),
+                createData('a = low', newText[0], newText[1]),
+                createData('b = high', newText[2], newText[3]),
+            ];
+
+            return (
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 100 }} aria-label="simple table">
                     <TableBody>
                       {rows.map((row) => (
                         <TableRow
@@ -160,7 +201,11 @@ class Weka extends Component {
                         }}/>
                     </Grid>
                     <Grid item xs={10}>
-                    <NewlineText text={wekaInfo[0]} />
+                        <WekaSummary text={wekaInfo[0]} />
+                    </Grid>
+                    <Grid item xs={3}>
+                        <h3>Confusion Matrix</h3>
+                        <WekaMatrix text={wekaInfo[1]} />
                     </Grid>
                 </Grid>
             </main>

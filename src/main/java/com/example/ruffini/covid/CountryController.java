@@ -147,6 +147,7 @@ public class CountryController {
  
             List<String> wekaList = new ArrayList<String>();
             wekaList.add(evaluation.toSummaryString("\nResults", false));
+            wekaList.add(evaluation.toMatrixString());
             
             return wekaList;
         }
