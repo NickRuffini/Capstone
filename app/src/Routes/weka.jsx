@@ -30,6 +30,7 @@ class Weka extends Component {
             this.setState({wekaInfo :res1, isLoading: false});
             console.log(this.state.wekaInfo[0])
             console.log(this.state.wekaInfo[1])
+            console.log(this.state.wekaInfo[2]);
         });
     }  
 
@@ -41,6 +42,10 @@ class Weka extends Component {
 
         function createData(criteria, number, percentage) {
             return { criteria, number, percentage };
+        }
+
+        function createAccuracyData(initial, tpRate, fpRate, precision, recall, fMeasure, mcc, rocArea, prcArea, classType) {
+            return { initial, tpRate, fpRate, precision, recall, fMeasure, mcc, rocArea, prcArea, classType };
         }
 
         // Formats the WEKA summary info so we can display it in the HTML
@@ -112,7 +117,7 @@ class Weka extends Component {
             );
         }
 
-        // Formats the WEKA summary info so we can display it in the HTML
+        // Formats the WEKA matrix info so we can display it in the HTML
         function WekaMatrix(props) {
             const text = props.text;
             let textSplit = text.split(/[\s,]+/);
@@ -144,6 +149,49 @@ class Weka extends Component {
                           </TableCell>
                           <TableCell align="right">{row.number}</TableCell>
                           <TableCell align="right">{row.percentage}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+            );
+        }
+
+        // Formats the WEKA chart info so we can display it in the HTML
+        function WekaAccuracy(props) {
+            const text = props.text;
+            let textSplit = text.split(/[\s,]+/);
+            console.log(textSplit);
+            const newText = [];
+
+            const rows = [
+                createAccuracyData('', 'TP Rate', 'FP Rate', 'Precision', 'Recall', 'F-Measure', 'MCC', 'ROC Area', 'PRC Area', 'Class'),
+                createAccuracyData('', textSplit[19], textSplit[20], textSplit[21], textSplit[22], textSplit[23], textSplit[24], textSplit[25], textSplit[26], textSplit[27]),
+                createAccuracyData('', textSplit[28], textSplit[29], textSplit[30], textSplit[31], textSplit[32], textSplit[33], textSplit[34], textSplit[35], textSplit[36]),
+                createAccuracyData('Weighted Average', textSplit[39], textSplit[40], textSplit[41], textSplit[42], textSplit[43], textSplit[44], textSplit[45], textSplit[46], ''),
+            ];
+
+            return (
+                <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 100 }} aria-label="simple table">
+                    <TableBody>
+                      {rows.map((row) => (
+                        <TableRow
+                          key={row.name}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {row.initial}
+                          </TableCell>
+                          <TableCell align="right">{row.tpRate}</TableCell>
+                          <TableCell align="right">{row.fpRate}</TableCell>
+                          <TableCell align="right">{row.precision}</TableCell>
+                          <TableCell align="right">{row.recall}</TableCell>
+                          <TableCell align="right">{row.fMeasure}</TableCell>
+                          <TableCell align="right">{row.mcc}</TableCell>
+                          <TableCell align="right">{row.rocArea}</TableCell>
+                          <TableCell align="right">{row.prcArea}</TableCell>
+                          <TableCell align="right">{row.classType}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -206,6 +254,10 @@ class Weka extends Component {
                     <Grid item xs={3}>
                         <h3>Confusion Matrix</h3>
                         <WekaMatrix text={wekaInfo[1]} />
+                    </Grid>
+                    <Grid item xs={8}>
+                        <h3>Detailed Accuracy by Class</h3>
+                        <WekaAccuracy text={wekaInfo[2]} />
                     </Grid>
                 </Grid>
             </main>
