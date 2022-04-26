@@ -16,11 +16,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Random;
 import weka.classifiers.Evaluation;
-import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.trees.RandomForest;
+import weka.classifiers.trees.J48;
+import weka.classifiers.bayes.NaiveBayes;
 
 @RestController
 @RequestMapping("/api")
@@ -92,8 +93,8 @@ public class CountryController {
 		return country;
 	}
 
-	@GetMapping("/weka/{criteriaName}")
-	List<String> getWeka(@PathVariable String criteriaName) {
+	@GetMapping("/weka/{criteriaName}/{classifierName}")
+	List<String> getWeka(@PathVariable String criteriaName, @PathVariable String classifierName) {
 		
 		System.out.println(criteriaName);
 		
@@ -101,7 +102,9 @@ public class CountryController {
         try {
             // Create J48 classifier by
             // creating object of J48 class
-            //J48 j48Classifier = new J48();
+            J48 j48Classifier = new J48();
+            
+            NaiveBayes naiveBayesClassifier = new NaiveBayes();
         	
         	RandomForest randomForestClassifier = new RandomForest();
         	//Where our attribute we WANT to look at is kept!
@@ -143,7 +146,20 @@ public class CountryController {
             Evaluation evaluation = new Evaluation(newDatasetInstances);
  
             // Cross Validate Model with 10 folds
-            evaluation.crossValidateModel(randomForestClassifier, newDatasetInstances, 10, new Random(1));
+            
+            //evaluation.crossValidateModel(randomForestClassifier, newDatasetInstances, 10, new Random(1));
+            
+            switch(classifierName) {
+	    		case "RandomForest":
+	    			evaluation.crossValidateModel(randomForestClassifier, newDatasetInstances, 10, new Random(1));
+	    			break;
+	    		case "J48":
+	    			evaluation.crossValidateModel(j48Classifier, newDatasetInstances, 10, new Random(1));
+	    			break;
+	    		default:
+	    			evaluation.crossValidateModel(naiveBayesClassifier, newDatasetInstances, 10, new Random(1));
+	    			break;
+            }
  
             List<String> wekaList = new ArrayList<String>();
             wekaList.add(evaluation.toSummaryString("\nResults", false));

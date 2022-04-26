@@ -21,7 +21,7 @@ class Weka extends Component {
 
     // Initial API call when the component loads up for first time, gets Weka initial info
     async componentDidMount() {
-        Promise.all([fetch('/api/weka/GDP')])
+        Promise.all([fetch('/api/weka/GDP/RandomForest')])
 
         .then(([res1]) => { 
             return Promise.all([res1.json()]) 
@@ -36,7 +36,7 @@ class Weka extends Component {
 
     render() {
         const sortingCriteria = ['GDP', 'Total Deaths Per Million'];
-        const sortingClassifiers = ['RandomForest'];
+        const sortingClassifiers = ['RandomForest', 'J48', 'NaiveBayes'];
 
         const {isLoading, classifierSelected, criteriaSelected, wekaInfo} = this.state;
 
@@ -202,7 +202,7 @@ class Weka extends Component {
 
         const getCriteria = (criteriaName) => {
             if(classifierSelected === "") {
-                Promise.all([fetch('/api/weka/' + criteriaName)])
+                Promise.all([fetch('/api/weka/' + criteriaName + '/' + classifierSelected)])
           
                 .then(([res1]) => { 
                    return Promise.all([res1.json()]) 
@@ -212,7 +212,7 @@ class Weka extends Component {
                 });
             }
             else {
-                Promise.all([fetch('/api/weka/' + criteriaName)])
+                Promise.all([fetch('/api/weka/' + criteriaName + '/' + classifierSelected)])
           
                 .then(([res1]) => { 
                    return Promise.all([res1.json()]) 
@@ -227,7 +227,14 @@ class Weka extends Component {
         // 1 case is when there is no country selected, so we just give generic stats for the criteria
         // 2nd case is when there IS a country to sort on
         const getClassifier = (classifierName) => {
-            
+            Promise.all([fetch('/api/weka/' + criteriaSelected + '/' + classifierName)])
+          
+            .then(([res1]) => { 
+                return Promise.all([res1.json()]) 
+            })
+            .then(([res1]) => {
+                this.setState({wekaInfo: res1, classifierSelected: classifierName});
+            });
         }
 
         if(isLoading) {
